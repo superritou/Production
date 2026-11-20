@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#24283a">
+<meta name="description" content="Calcul du temps total pour X pièces à partir du temps unitaire.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>⚙️ Temps de production</title>
+<link rel="icon" type="image/png" href="temps-production-icone-512.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: linear-gradient(160deg, #171a26 0%, #24283a 100%);
+  color: #e2e8f0;
+  padding: 16px;
+}
+h1 {
+  font-size: 22px;
+  margin: 14px 0 22px;
+  color: #fbbf24;
+  text-align: center;
+}
+main {
+  width: 100%;
+  max-width: 420px;
+  background: #2b3044;
+  border: 1px solid #3b4257;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.groupe { margin-bottom: 18px; }
+.groupe label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.champ {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 20px;
+  text-align: center;
+  color: #e2e8f0;
+  background: #1e2230;
+  border: 1px solid #3b4257;
+  border-radius: 8px;
+  outline: none;
+}
+.champ:focus { border-color: #14b8a6; }
+.champ::placeholder { color: #556; }
+.triple {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.triple .col { text-align: center; }
+.triple label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 6px;
+}
+#btnCalculer {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  background: #0f766e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#btnCalculer:hover { background: #14b8a6; }
+#btnCalculer:active { transform: translateY(1px); }
+#erreur {
+  margin-top: 12px;
+  color: #f43f5e;
+  font-size: 14px;
+  text-align: center;
+  display: none;
+}
+#resultat {
+  margin-top: 20px;
+  text-align: center;
+  display: none;
+}
+#resultat h2 {
+  font-size: 13px;
+  font-weight: bold;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+#tempsTotal {
+  font-size: 34px;
+  font-weight: bold;
+  color: #2dd4bf;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+#tempsDetail {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+#tempsDetail span { color: #fbbf24; }
+#btnSauver, #btnToutEffacer {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+  background: #0f766e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#btnSauver:hover, #btnToutEffacer:hover { background: #14b8a6; }
+#btnSauver:active, #btnToutEffacer:active { transform: translateY(1px); }
+#sauvegarde { margin-top: 20px; }
+#commentaire { font-size: 16px; text-align: left; }
+#blocHistorique { margin-top: 24px; }
+.entete-historique {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.entete-historique h2 {
+  font-size: 15px;
+  color: #fbbf24;
+}
+#btnToutEffacer {
+  width: auto;
+  padding: 7px 12px;
+  font-size: 12px;
+  background: #3b4257;
+}
+#btnToutEffacer:hover { background: #f43f5e; }
+#listeHistorique {
+  list-style: none;
+  max-height: 40vh;
+  max-height: 40dvh;
+  overflow-y: auto;
+}
+#listeHistorique li {
+  position: relative;
+  background: #1e2230;
+  border: 1px solid #3b4257;
+  border-left: 4px solid #14b8a6;
+  border-radius: 8px;
+  padding: 10px 36px 10px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+#listeHistorique li .h-date {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+#listeHistorique li .h-total {
+  display: block;
+  color: #2dd4bf;
+  font-weight: bold;
+  font-size: 15px;
+}
+#listeHistorique li .h-commentaire {
+  display: block;
+  color: #fbbf24;
+  margin-top: 2px;
+}
+#listeHistorique li button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#listeHistorique li button:hover {
+  color: #f43f5e;
+  background: #2b3044;
+}
+/* ConfirmToast (même esprit que le Calendrier) */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 20, 0.60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.confirm-overlay[hidden] { opacity: 0; visibility: hidden; }
+.confirm-boite {
+  position: relative;
+  width: min(380px, calc(100vw - 40px));
+  background: #2b3044;
+  border: 2px solid #14b8a6;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.confirm-boite h3 {
+  font-size: 17px;
+  color: #2dd4bf;
+  margin-bottom: 12px;
+}
+.confirm-boite p {
+  font-size: 15px;
+  color: #e2e8f0;
+  margin-bottom: 18px;
+}
+.confirm-croix {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.confirm-croix:hover { color: #f43f5e; background: #1e2230; }
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.confirm-actions button {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#confirmNon { background: #3b4257; }
+#confirmNon:hover { background: #475569; }
+#confirmOui { background: #0f766e; }
+#confirmOui:hover { background: #14b8a6; }
+.confirm-actions button:active { transform: translateY(1px); }
+footer {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+@media (max-width: 420px) {
+  h1 { font-size: 19px; }
+  #tempsTotal { font-size: 27px; }
+  .champ { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+<h1>⚙️ Temps de production</h1>
+<main>
+  <div class="groupe">
+    <label for="nbPieces">Nombre de pièces</label>
+    <input id="nbPieces" class="champ" type="number" inputmode="numeric" min="1" step="1" placeholder="100">
+  </div>
+
+  <div class="groupe">
+    <label for="tHeures">Temps unitaire</label>
+    <div class="triple">
+      <div class="col">
+        <label for="tHeures">Heures</label>
+        <input id="tHeures" class="champ" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+      </div>
+      <div class="col">
+        <label for="tMinutes">Minutes</label>
+        <input id="tMinutes" class="champ" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+      </div>
+      <div class="col">
+        <label for="tSecondes">Secondes</label>
+        <input id="tSecondes" class="champ" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+      </div>
+    </div>
+  </div>
+
+  <button id="btnCalculer" type="button">= Calculer</button>
+  <p id="erreur"></p>
+
+  <div id="resultat">
+    <h2>Temps total</h2>
+    <div id="tempsTotal"></div>
+    <div id="tempsDetail"></div>
+  </div>
+
+  <div id="sauvegarde" class="groupe" style="display:none">
+    <label for="commentaire">Commentaire (facultatif)</label>
+    <input id="commentaire" class="champ" type="text" maxlength="200" placeholder="Ex. : série brides alu">
+    <button id="btnSauver" type="button">💾 Sauvegarder ce calcul</button>
+  </div>
+
+  <div id="blocHistorique" style="display:none">
+    <div class="entete-historique">
+      <h2>💾 Sauvegardes</h2>
+      <button id="btnToutEffacer" type="button">🗑️ Tout effacer</button>
+    </div>
+    <ul id="listeHistorique"></ul>
+  </div>
+
+  <div id="confirmOverlay" class="confirm-overlay" hidden>
+    <div id="confirmBoite" class="confirm-boite">
+      <button id="confirmCroix" type="button" class="confirm-croix" title="Fermer">✕</button>
+      <h3 id="confirmTitre">Confirmation</h3>
+      <p id="confirmMessage"></p>
+      <div class="confirm-actions">
+        <button id="confirmNon" type="button">Non</button>
+        <button id="confirmOui" type="button">Oui</button>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>100 % local, les sauvegardes restent sur votre appareil.</footer>
+
+<script>
+"use strict";
+
+const nbPieces = document.getElementById("nbPieces");
+const tHeures = document.getElementById("tHeures");
+const tMinutes = document.getElementById("tMinutes");
+const tSecondes = document.getElementById("tSecondes");
+const btnCalculer = document.getElementById("btnCalculer");
+const erreur = document.getElementById("erreur");
+const resultat = document.getElementById("resultat");
+const tempsTotal = document.getElementById("tempsTotal");
+const tempsDetail = document.getElementById("tempsDetail");
+const blocSauvegarde = document.getElementById("sauvegarde");
+const commentaire = document.getElementById("commentaire");
+const btnSauver = document.getElementById("btnSauver");
+const blocHistorique = document.getElementById("blocHistorique");
+const listeHistorique = document.getElementById("listeHistorique");
+const btnToutEffacer = document.getElementById("btnToutEffacer");
+const CLE_HISTORIQUE = "temps_production_historique";
+const MAX_ENTREES = 100;
+let dernierCalcul = null;
+
+function afficherErreur(message) {
+  erreur.textContent = message;
+  erreur.style.display = "block";
+  resultat.style.display = "none";
+  blocSauvegarde.style.display = "none";
+}
+
+function lireNombre(champ) {
+  const texte = champ.value.trim();
+  if (texte === "") return 0;
+  // Accepte la virgule ou le point comme séparateur décimal
+  const valeur = parseFloat(texte.replace(",", "."));
+  if (isNaN(valeur) || valeur < 0) return null;
+  return valeur;
+}
+
+function formaterNombre(valeur, decimales) {
+  return valeur.toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimales
+  });
+}
+
+function calculer() {
+  erreur.style.display = "none";
+
+  const pieces = lireNombre(nbPieces);
+  const h = lireNombre(tHeures);
+  const m = lireNombre(tMinutes);
+  const s = lireNombre(tSecondes);
+
+  if (pieces === null || h === null || m === null || s === null) {
+    afficherErreur("Valeurs invalides : saisissez des nombres positifs.");
+    return;
+  }
+  if (!Number.isInteger(pieces) || pieces < 1) {
+    afficherErreur("Le nombre de pièces doit être un entier ≥ 1.");
+    return;
+  }
+  if (h + m + s === 0) {
+    afficherErreur("Saisissez un temps unitaire (au moins un champ non nul).");
+    return;
+  }
+
+  const totalSecondes = (h * 3600 + m * 60 + s) * pieces;
+
+  const totalH = Math.floor(totalSecondes / 3600);
+  const resteApresH = totalSecondes - totalH * 3600;
+  const totalM = Math.floor(resteApresH / 60);
+  const totalS = resteApresH - totalM * 60;
+
+  tempsTotal.textContent =
+    totalH + " h " + totalM + " min " +
+    formaterNombre(totalS, 2) + " s";
+
+  tempsDetail.innerHTML =
+    "Soit <span>" + formaterNombre(totalSecondes, 2) + " s</span>" +
+    " ou <span>" + formaterNombre(totalSecondes / 3600, 2) + " h</span> décimales.";
+
+  resultat.style.display = "block";
+  blocSauvegarde.style.display = "block";
+
+  dernierCalcul = {
+    pieces: pieces,
+    unitaire: formaterTemps(h, m, s),
+    total: formaterTemps(totalH, totalM, totalS)
+  };
+}
+
+function formaterTemps(h, m, s) {
+  let texte = "";
+  if (h > 0) texte += formaterNombre(h, 2) + " h ";
+  if (h > 0 || m > 0) texte += formaterNombre(m, 2) + " min ";
+  texte += formaterNombre(s, 2) + " s";
+  return texte.trim();
+}
+
+function lireHistorique() {
+  try {
+    const brut = localStorage.getItem(CLE_HISTORIQUE);
+    const liste = brut ? JSON.parse(brut) : [];
+    return Array.isArray(liste) ? liste : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function ecrireHistorique(liste) {
+  // Nouvelle entrée en tête, maximum MAX_ENTREES
+  liste = liste.slice(0, MAX_ENTREES);
+  localStorage.setItem(CLE_HISTORIQUE, JSON.stringify(liste));
+}
+
+function afficherHistorique() {
+  const liste = lireHistorique();
+  listeHistorique.innerHTML = "";
+  blocHistorique.style.display = liste.length > 0 ? "block" : "none";
+  liste.forEach(function (entree, index) {
+    const li = document.createElement("li");
+
+    const dateDiv = document.createElement("span");
+    dateDiv.className = "h-date";
+    dateDiv.textContent = entree.date + " — " + formaterNombre(entree.pieces, 0) + " pièce(s) à " + entree.unitaire + " / pièce";
+    li.appendChild(dateDiv);
+
+    const totalDiv = document.createElement("span");
+    totalDiv.className = "h-total";
+    totalDiv.textContent = "⏱️ " + entree.total;
+    li.appendChild(totalDiv);
+
+    if (entree.commentaire) {
+      const commDiv = document.createElement("span");
+      commDiv.className = "h-commentaire";
+      commDiv.textContent = "📝 " + entree.commentaire;
+      li.appendChild(commDiv);
+    }
+
+    const suppr = document.createElement("button");
+    suppr.type = "button";
+    suppr.title = "Supprimer";
+    suppr.textContent = "✕";
+    suppr.addEventListener("click", function () {
+      const restant = lireHistorique();
+      restant.splice(index, 1);
+      ecrireHistorique(restant);
+      afficherHistorique();
+    });
+    li.appendChild(suppr);
+
+    listeHistorique.appendChild(li);
+  });
+}
+
+btnSauver.addEventListener("click", function () {
+  if (!dernierCalcul) return;
+  const liste = lireHistorique();
+  liste.unshift({
+    date: new Date().toLocaleString("fr-FR"),
+    pieces: dernierCalcul.pieces,
+    unitaire: dernierCalcul.unitaire,
+    total: dernierCalcul.total,
+    commentaire: commentaire.value.trim()
+  });
+  ecrireHistorique(liste);
+  commentaire.value = "";
+  afficherHistorique();
+  blocSauvegarde.style.display = "none";
+});
+
+btnToutEffacer.addEventListener("click", function () {
+  confirmToast("🗑️ Tout effacer", "Supprimer toutes les sauvegardes ?").then(function (reponse) {
+    if (reponse !== true) return;
+    localStorage.removeItem(CLE_HISTORIQUE);
+    afficherHistorique();
+  });
+});
+
+/* ConfirmToast (même esprit que le Calendrier) :
+   retourne true (Oui), false (Non) ou null (✕, clic hors boîte, Échap) */
+const confirmOverlay = document.getElementById("confirmOverlay");
+const confirmTitre = document.getElementById("confirmTitre");
+const confirmMessage = document.getElementById("confirmMessage");
+const confirmOui = document.getElementById("confirmOui");
+const confirmNon = document.getElementById("confirmNon");
+const confirmCroix = document.getElementById("confirmCroix");
+let confirmResolution = null;
+
+function confirmToast(titre, message) {
+  return new Promise(function (resolution) {
+    confirmResolution = resolution;
+    confirmTitre.textContent = titre;
+    confirmMessage.textContent = message;
+    confirmOverlay.hidden = false;
+  });
+}
+
+function fermerConfirm(valeur) {
+  if (confirmResolution) {
+    const resoudre = confirmResolution;
+    confirmResolution = null;
+    confirmOverlay.hidden = true;
+    resoudre(valeur);
+  }
+}
+
+confirmOui.addEventListener("click", function () { fermerConfirm(true); });
+confirmNon.addEventListener("click", function () { fermerConfirm(false); });
+confirmCroix.addEventListener("click", function () { fermerConfirm(null); });
+confirmOverlay.addEventListener("click", function (e) {
+  if (e.target === confirmOverlay) fermerConfirm(null);
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && !confirmOverlay.hidden) fermerConfirm(null);
+});
+
+afficherHistorique();
+
+btnCalculer.addEventListener("click", calculer);
+
+// Entrée = Calculer dans n'importe quel champ
+[nbPieces, tHeures, tMinutes, tSecondes].forEach(function (champ) {
+  champ.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") calculer();
+  });
+});
+
+// Enregistrement du Service Worker (ignoré proprement en local file://)
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("./sw.js").catch(function () {
+    // Échec d'enregistrement : l'app fonctionne quand même, juste sans mode hors ligne
+  });
+}
+</script>
+</body>
+</html>

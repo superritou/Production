@@ -1,0 +1,45 @@
+{
+  "id": "./⚙️-temps-de-production.html",
+  "start_url": "./⚙️-temps-de-production.html",
+  "scope": "./",
+  "name": "⚙️ Temps de production",
+  "short_name": "Temps prod",
+  "description": "Calcul du temps total pour X pièces à partir du temps unitaire, avec sauvegardes.",
+  "lang": "fr",
+  "display": "standalone",
+  "background_color": "#24283a",
+  "theme_color": "#24283a",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "./temps-production-icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./temps-production-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./capture-mobile-1080x1920.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "description": "Aperçu mobile de l'app"
+    },
+    {
+      "src": "./capture-bureau-1920x1080.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "description": "Aperçu Windows/bureau de l'app"
+    }
+  ]
+}
